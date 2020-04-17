@@ -93,3 +93,15 @@ id could be represented in 10 bits, leaving 12 bits for the serial number. This
 would expand the serial space to the point where it is quite unlikely that any
 system produced in the foreseeable future would be able to exhaust serial
 numbers in a millisecond.
+
+There is also a potential performance issue as more requests are made in
+parallel. The benchmark runs requests serially by default, but as more parallel
+requests are added the performance suffers. This is likely due to contention for
+the `Counter` agent. (Interestingly, the `strong_random` case shows even worse
+performance degradation, suggesting that there is resource contention in the
+OpenSSL library.) One possible way of dealing with this degradation is to run
+multiple agents handing out serial numbers from non-overlapping domains. You
+could, for example, run two agents handing out about 2,000 serials each without
+having to worry about synchronizing them. You would have to ensure that requests
+were relatively evenly balanced between the two, but it should help relieve
+contention in highly parallel environments.
